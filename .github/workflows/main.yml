@@ -23,16 +23,16 @@ jobs:
       - name: Create Release
         id: create_release
         uses: ncipollo/release-action@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN }}
         with:
+          artifacts: "release.tgz,dist/*" # 一组可选的路径，表示要上传到版本的产出文件。 这可能是单个路径或以逗号分隔的路径列表（或 globs）
           tag: ${{ github.ref }} # 发布的可选标签。 如果省略，将使用 git ref （如果它是标签）。
           name: Release ${{ github.ref }} # 版本的可选名称。 如果省略，将使用标签。
           body: TODO New Release. #  body发布的可选主体
+          generateReleaseNotes: true # 指示是否应自动生成发行说明。
           draft: false # 可选择将此版本标记为草稿版本。 设置为 true 以启用。
           prerelease: false # 可选择将此版本标记为预发布。 设置为 true 以启用。
           allowUpdates: true # allowUpdates 一个可选标志，表示如果版本已经存在，我们是否应该更新它。默认值为 false。
-
+          token: ${{ secrets.TOKEN }}
       # 上传构建结果到 Release
       # - name: Upload Release Asset
       #   uses: actions/upload-release-asset@v1
