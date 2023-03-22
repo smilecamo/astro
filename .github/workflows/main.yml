@@ -31,7 +31,6 @@ jobs:
           generateReleaseNotes: true # 指示是否应自动生成发行说明。
           draft: false # 可选择将此版本标记为草稿版本。 设置为 true 以启用。
           prerelease: false # 可选择将此版本标记为预发布。 设置为 true 以启用。
-          generateReleaseNotes: true 	
           allowUpdates: false # allowUpdates 一个可选标志，表示如果版本已经存在，我们是否应该更新它。默认值为 false。
           token: ${{ secrets.TOKEN }}
       # 上传构建结果到 Release
