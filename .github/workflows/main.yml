@@ -34,15 +34,15 @@ jobs:
           allowUpdates: true # allowUpdates 一个可选标志，表示如果版本已经存在，我们是否应该更新它。默认值为 false。
 
       # 上传构建结果到 Release
-      - name: Upload Release Asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./release.tgz
-          asset_name: release.tgz
-          asset_content_type: application/x-tgz
+      # - name: Upload Release Asset
+      #   uses: actions/upload-release-asset@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.TOKEN }}
+      #   with:
+      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+      #     asset_path: ./release.tgz
+      #     asset_name: release.tgz
+      #     asset_content_type: application/x-tgz
 
       # 部署到服务器
       - name: Deploy
