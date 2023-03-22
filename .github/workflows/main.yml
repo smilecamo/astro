@@ -20,7 +20,7 @@ jobs:
       # 发布 Release
       - name: Create Release
         id: create_release
-        uses: actions/create-release@latest
+        uses: ncipollo/release-action@v1
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
         with:
