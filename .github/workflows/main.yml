@@ -24,8 +24,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.TOKEN }}
         with:
-          tag_name: ${{ github.ref }} # 发布的可选标签。 如果省略，将使用 git ref （如果它是标签）。
-          release_name: Release ${{ github.ref }} # 版本的可选名称。 如果省略，将使用标签。
+          tag: ${{ github.ref }} # 发布的可选标签。 如果省略，将使用 git ref （如果它是标签）。
+          name: Release ${{ github.ref }} # 版本的可选名称。 如果省略，将使用标签。
           body: TODO New Release. #  body发布的可选主体
           draft: false # 可选择将此版本标记为草稿版本。 设置为 true 以启用。
           prerelease: false # 可选择将此版本标记为预发布。 设置为 true 以启用。
