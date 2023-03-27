@@ -47,13 +47,13 @@ jobs:
           MINOR="${PARTS[1]}"
           PATCH="${PARTS[2]}"
           NEXT_PATCH=$((PATCH+1))
-          echo "::set-output name=next-version::v${MAJOR}.${MINOR}.${NEXT_PATCH}"
+          echo "NEXT_VERSION=v${MAJOR}.${MINOR}.${NEXT_PATCH}" >> $GITHUB_ENV
 
       - name: Create new release
         uses: actions/create-release@v1
         with:
-          tag_name: ${{ steps.increment_version.outputs.next-version }}
-          release_name: Release ${{ steps.increment_version.outputs.next-version }}
+          tag_name: ${{ env.NEXT_VERSION }}
+          release_name: Release ${{ env.NEXT_VERSION }}
           body: |
             Changes:
             - ...
