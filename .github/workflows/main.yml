@@ -1,51 +1,77 @@
-name: Publish And Deploy Demo
-on: [push]
+name: Publish and Deploy Astro App
+
+on:
+  push:
+    branches: [main]
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
-      # 下载源码
-      - name: Checkout
-        uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-      # 打包构建
-      - name: Build
-        uses: actions/setup-node@master
-      - run: npm install
-      - run: npm run build
-      - run: ls
-      - run: tar -zcvf release.tgz dist
+      - name: Install dependencies
+        run: npm install
 
-      # 发布 Release
-      - name: Create Release
-        id: create_release
-        uses: ncipollo/release-action@v1
+      - name: Build app
+        run: npm run build
+
+      - name: Package app
+        run: tar -zcvf release.tgz dist
+
+      - name: Get latest release tag
+        id: get_latest_release
+        uses: actions/github-script@v3
         with:
-          artifacts: "release.tgz,dist/*" # 一组可选的路径，表示要上传到版本的产出文件。 这可能是单个路径或以逗号分隔的路径列表（或 globs）
-          tag: ${{ github.ref }} # 发布的可选标签。 如果省略，将使用 git ref （如果它是标签）。
-          name: Release ${{ github.ref }} # 版本的可选名称。 如果省略，将使用标签。
-          body: TODO New Release. #  body发布的可选主体
-          generateReleaseNotes: true # 指示是否应自动生成发行说明。
-          draft: false # 可选择将此版本标记为草稿版本。 设置为 true 以启用。
-          prerelease: false # 可选择将此版本标记为预发布。 设置为 true 以启用。
-          allowUpdates: false # allowUpdates 一个可选标志，表示如果版本已经存在，我们是否应该更新它。默认值为 false。
-          token: ${{ secrets.TOKEN }}
-      # 上传构建结果到 Release
-      # - name: Upload Release Asset
-      #   uses: actions/upload-release-asset@v1
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.TOKEN }}
-      #   with:
-      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
-      #     asset_path: ./release.tgz
-      #     asset_name: release.tgz
-      #     asset_content_type: application/x-tgz
+          script: |
+            const { data } = await github.repos.listReleases({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 1 // only need the latest release
+            });
+            if (data.length === 0) {
+              return "v0.1.0"; // default version if no releases yet
+            }
+            return data[0].tag_name;
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # 部署到服务器
-      - name: Deploy
+      - name: Increment version number
+        id: increment_version
+        run: |
+          VERSION=${{ steps.get_latest_release.outputs.result }}
+          VERSION_NUMBER=$(echo "${VERSION}" | cut -c 2-)
+          IFS='.' read -ra PARTS <<< "$VERSION_NUMBER"
+          MAJOR="${PARTS[0]}"
+          MINOR="${PARTS[1]}"
+          PATCH="${PARTS[2]}"
+          NEXT_PATCH=$((PATCH+1))
+          echo "::set-output name=next-version::v${MAJOR}.${MINOR}.${NEXT_PATCH}"
+
+      - name: Create new release
+        uses: actions/create-release@v1
+        with:
+          tag_name: ${{ steps.increment_version.outputs.next-version }}
+          release_name: Release ${{ steps.increment_version.outputs.next-version }}
+          body: |
+            Changes:
+            - ...
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload release assets
+        id: upload_release_assets
+        uses: actions/upload-artifact@v2
+        with:
+          name: release-assets
+          path: |
+            dist/
+            release.tgz
+
+      - name: Deploy app to server
         uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.HOST }}
@@ -53,6 +79,6 @@ jobs:
           password: ${{ secrets.PASSWORD }}
           port: ${{ secrets.PORT }}
           script: |
-            cd /root/dev
+            cd /root/astro/
             wget https://github.com/smilecamo/astro/releases/latest/download/release.tgz -O release.tgz
             tar zxvf release.tgz
