@@ -79,6 +79,6 @@ jobs:
           password: ${{ secrets.PASSWORD }}
           port: ${{ secrets.PORT }}
           script: |
-            cd /root/astro/
-            wget https://github.com/smilecamo/astro/releases/latest/download/release.tgz -O release.tgz
+            cd //root/dev/
+            wget https://github.com/smilecamo/astro/releases/download/v0.1.0/release.tgz -O release.tgz
             tar zxvf release.tgz
